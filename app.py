@@ -1,5 +1,6 @@
 import os
 import time
+import secrets
 
 from flask import Flask, request, flash, redirect, url_for, send_from_directory
 from werkzeug.utils import secure_filename
@@ -13,13 +14,13 @@ ALLOWED_EXTENSIONS = {"jpg", "jpeg", "png", "gif"}
 
 app = Flask("Gangster Serve")
 app.config["UPLOAD_FOLDER"] = UPLOAD_FOLDER
-app.secret_key = os.urandom(16)
+app.config["MAX_CONTENT_LENGTH"] = 5 * 1024 * 1024  # Limit upload size to 5mb
+app.secret_key = secrets.token_urlsafe(32)
 
 
 def allowed_file(filename):
     ext = os.path.splitext(filename)[-1].lower()[1:]  # get rid of .
     return ext in ALLOWED_EXTENSIONS
-
 
 
 @app.route("/", methods=["GET", "POST"])

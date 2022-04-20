@@ -1,3 +1,4 @@
+from pathlib import Path
 from imutils import face_utils
 import imutils
 import numpy as np
@@ -5,15 +6,20 @@ import dlib
 import cv2
 
 
+_rt = Path(__file__).resolve().parent
+
+
 # load face and landmark detectors
 face_detector = dlib.get_frontal_face_detector()
-landmark_predictor = dlib.shape_predictor("./shape_predictor_68_face_landmarks.dat")
+landmark_predictor = dlib.shape_predictor(
+    str(_rt / "shape_predictor_68_face_landmarks.dat")
+)
 
 (lStart, lEnd) = face_utils.FACIAL_LANDMARKS_IDXS["left_eye"]
 (rStart, rEnd) = face_utils.FACIAL_LANDMARKS_IDXS["right_eye"]
 
 # load glasses image
-glasses = cv2.imread("./glasses.png", cv2.IMREAD_UNCHANGED)
+glasses = cv2.imread(str(_rt / "glasses.png"), cv2.IMREAD_UNCHANGED)
 gh, gw = glasses.shape[:2]
 scale = 0.4
 gh = int(gh * scale)
@@ -56,15 +62,15 @@ def make_gangster(frame: np.ndarray) -> np.ndarray:
         rightEyeC = np.mean(rightEye, axis=0).astype(int)
 
         # find angle, distance between eyes and center between eyes
-        vec = leftEyeC - rightEyeC 
+        vec = leftEyeC - rightEyeC
         theta = -np.rad2deg(np.arctan2(vec[1], vec[0]))
         dis = np.sqrt(np.mean(np.square(vec)))
         center = np.mean([leftEyeC, rightEyeC], axis=0).astype(int)
 
         # calculate resize scale of glasses
         scale = dis / gw
-        _gw = int(4*gw * scale)
-        _gh = int(4*gh * scale)
+        _gw = int(4 * gw * scale)
+        _gh = int(4 * gh * scale)
         # print(f"{_gw=} {_gh=}")
         _glasses = cv2.resize(glasses, (_gw, _gh))
         _glasses_mask = cv2.resize(glasses_mask, (_gw, _gh))
@@ -73,10 +79,10 @@ def make_gangster(frame: np.ndarray) -> np.ndarray:
         _glasses = imutils.rotate(_glasses, theta)
         _glasses_mask = imutils.rotate(_glasses_mask, theta)
 
-        x = int(center[0] - _gw/2)
-        y = int(center[1] - _gh/2)
-        slice_y = slice(y, y+_gh)
-        slice_x = slice(x, x+_gw)
+        x = int(center[0] - _gw / 2)
+        y = int(center[1] - _gh / 2)
+        slice_y = slice(y, y + _gh)
+        slice_x = slice(x, x + _gw)
         try:
             mask = np.where(_glasses_mask < 100, frame[slice_y, slice_x], _glasses)
             frame[slice_y, slice_x] = mask
