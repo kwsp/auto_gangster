@@ -23,7 +23,7 @@ glasses_mask = cv2.cvtColor(glasses[:, :, 3], cv2.COLOR_GRAY2BGR)
 glasses = glasses[:, :, :3]
 
 
-def make_gangster(frame: np.ndarray):
+def make_gangster(frame: np.ndarray) -> np.ndarray:
     """
     Draw gangster glasses to all faces in the frame
     """
@@ -83,3 +83,5 @@ def make_gangster(frame: np.ndarray):
         except ValueError:
             # TODO: fix this
             print("Glasses out of bounds")
+
+    return frame
