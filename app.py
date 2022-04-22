@@ -45,7 +45,7 @@ def upload_file():
             file.save(filepath)
 
             img = cv2.imread(filepath)
-            img = gangster.make_gangster(img)
+            gangster.make_gangster(img)
             cv2.imwrite(filepath, img)
 
             return redirect(url_for("uploaded_file", filename=filename))

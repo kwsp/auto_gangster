@@ -14,9 +14,13 @@ time.sleep(1.0)
 # loop over frames from the video stream
 while True:
     frame = vs.read()
-    frame = imutils.resize(frame, width=450)
+    frame = imutils.resize(frame, width=550)
 
-    make_gangster(frame)
+    n = make_gangster(frame)
+
+    # fmt: off
+    cv2.putText(frame, f"# faces: {n}", (10, 30),
+        cv2.FONT_HERSHEY_DUPLEX, 1, (255, 0, 0), 1, cv2.LINE_AA)
 
     # show the frame
     cv2.imshow("Frame", frame)
@@ -25,6 +29,6 @@ while True:
     # if the `q` key was pressed, break from the loop
     if key == ord("q"):
         break
-# do a bit of cleanup
+
 cv2.destroyAllWindows()
 vs.stop()

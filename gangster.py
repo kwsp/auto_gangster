@@ -1,3 +1,4 @@
+from typing import Tuple
 from pathlib import Path
 from imutils import face_utils
 import imutils
@@ -29,9 +30,12 @@ glasses_mask = cv2.cvtColor(glasses[:, :, 3], cv2.COLOR_GRAY2BGR)
 glasses = glasses[:, :, :3]
 
 
-def make_gangster(frame: np.ndarray) -> np.ndarray:
+def make_gangster(frame: np.ndarray) -> int:
     """
-    Draw gangster glasses to all faces in the frame
+    Draw gangster glasses to all faces in the frame.
+    Modifies the image inplace.
+
+    Returns the number of faces
     """
     shape_y, shape_x = frame.shape[:2]
 
@@ -97,4 +101,4 @@ def make_gangster(frame: np.ndarray) -> np.ndarray:
         except ValueError as e:
             print(e)
 
-    return frame
+    return len(rects)
