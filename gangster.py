@@ -33,6 +33,7 @@ def make_gangster(frame: np.ndarray) -> np.ndarray:
     """
     Draw gangster glasses to all faces in the frame
     """
+    shape_y, shape_x = frame.shape[:2]
 
     gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
     # detect faces in the grayscale frame
@@ -40,22 +41,12 @@ def make_gangster(frame: np.ndarray) -> np.ndarray:
 
     # loop over the face detections
     for rect in rects:
-        # determine the facial landmarks for the face region, then
-        # convert the facial landmark (x, y)-coordinates to a NumPy
-        # array
+        # get facial landmarks for the face region
         shape = landmark_predictor(gray, rect)
         shape = face_utils.shape_to_np(shape)
-        # extract the left and right eye coordinates, then use the
-        # coordinates to compute the eye aspect ratio for both eyes
+        # extract the left and right eye coordinates
         leftEye = shape[lStart:lEnd]
         rightEye = shape[rStart:rEnd]
-
-        # # compute the convex hull for the left and right eye, then
-        # # visualize each of the eyes
-        # leftEyeHull = cv2.convexHull(leftEye)
-        # rightEyeHull = cv2.convexHull(rightEye)
-        # cv2.drawContours(frame, [leftEyeHull], -1, (0, 255, 0), 1)
-        # cv2.drawContours(frame, [rightEyeHull], -1, (0, 255, 0), 1)
 
         # find center of eyes
         leftEyeC = np.mean(leftEye, axis=0).astype(int)
@@ -69,25 +60,41 @@ def make_gangster(frame: np.ndarray) -> np.ndarray:
 
         # calculate resize scale of glasses
         scale = dis / gw
-        _gw = int(4 * gw * scale)
-        _gh = int(4 * gh * scale)
-        # print(f"{_gw=} {_gh=}")
+        _gw = int(4 * gw * scale)  # glasses width
+        _gh = int(4 * gh * scale)  # glasses height
         _glasses = cv2.resize(glasses, (_gw, _gh))
         _glasses_mask = cv2.resize(glasses_mask, (_gw, _gh))
 
-        # rotate glasses
+        # rotate glasses to eye level
         _glasses = imutils.rotate(_glasses, theta)
         _glasses_mask = imutils.rotate(_glasses_mask, theta)
 
-        x = int(center[0] - _gw / 2)
-        y = int(center[1] - _gh / 2)
-        slice_y = slice(y, y + _gh)
-        slice_x = slice(x, x + _gw)
+        # coord on frame to place glasses
+        xmin = int(center[0] - _gw / 2)
+        ymin = int(center[1] - _gh / 2)
+        xmax = xmin + _gw
+        ymax = ymin + _gh
+
+        # coords for glasses
+        gxmin = -min(xmin, 0)
+        gymin = -min(ymin, 0)
+        gxmax = _gw - max(xmin + _gw - shape_x, 0)
+        gymax = _gh - max(ymin + _gh - shape_y, 0)
+
+        # calculate slices to index
+        slice_y = slice(max(ymin, 0), min(ymax, shape_y))
+        slice_x = slice(max(xmin, 0), min(xmax, shape_x))
+        gslice_y = slice(gymin, gymax)
+        gslice_x = slice(gxmin, gxmax)
+
+        # slice glasses in case the edges are outside the frame
+        _glasses = _glasses[gslice_y, gslice_x]
+        _glasses_mask = _glasses_mask[gslice_y, gslice_x]
+
         try:
             mask = np.where(_glasses_mask < 100, frame[slice_y, slice_x], _glasses)
             frame[slice_y, slice_x] = mask
-        except ValueError:
-            # TODO: fix this
-            print("Glasses out of bounds")
+        except ValueError as e:
+            print(e)
 
     return frame
