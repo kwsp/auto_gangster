@@ -24,6 +24,7 @@ def allowed_file(filename):
 
 
 @app.route("/", methods=["GET", "POST"])
+@app.route("/api", methods=["GET", "POST"])
 def upload_file():
     if request.method == "POST":
         # check if the post request has the file part
@@ -40,7 +41,7 @@ def upload_file():
         if file and allowed_file(file.filename):
             filename = secure_filename(file.filename)
 
-            filename = f"tmp_{int(time.time())}{os.path.splitext(filename)[-1]}"
+            filename = f"tmp_{int(1000*time.time())}{os.path.splitext(filename)[-1]}"
             filepath = os.path.join(app.config["UPLOAD_FOLDER"], filename)
             file.save(filepath)
 
@@ -52,11 +53,11 @@ def upload_file():
 
     return """
     <!doctype html>
-    <title>Auto Gangster</title>
-    <h1>Gangsterfy an image</h1>
+    <title>Auto Gangsta</title>
+    <h1>Gangstarify your image!</h1>
     <form method=post enctype=multipart/form-data>
-      <input type=file name=file>
-      <input type=submit value=Upload>
+      <input type="file" name="file">
+      <input type="submit" value="Gangstarify">
     </form>
     """
 
