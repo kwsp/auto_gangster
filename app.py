@@ -2,7 +2,7 @@ import os
 import time
 import secrets
 
-from flask import Flask, request, flash, redirect, url_for, send_from_directory
+from flask import Flask, request, flash, redirect, url_for, send_from_directory, jsonify
 from werkzeug.utils import secure_filename
 
 import gangster
@@ -13,6 +13,7 @@ UPLOAD_FOLDER = "uploads"
 ALLOWED_EXTENSIONS = {"jpg", "jpeg", "png", "gif", "webp"}
 
 app = Flask("Gangster Serve")
+
 app.config["UPLOAD_FOLDER"] = UPLOAD_FOLDER
 app.config["MAX_CONTENT_LENGTH"] = 5 * 1024 * 1024  # Limit upload size to 5mb
 app.secret_key = secrets.token_urlsafe(32)
@@ -24,7 +25,6 @@ def allowed_file(filename):
 
 
 @app.route("/", methods=["GET", "POST"])
-@app.route("/api", methods=["GET", "POST"])
 def upload_file():
     if request.method == "POST":
         # check if the post request has the file part
@@ -61,6 +61,32 @@ def upload_file():
     </form>
     """
 
+
+@app.route("/api", methods=["POST"])
+def api_upload():
+    if "file" not in request.files:
+        print("File not in request")
+        return jsonify({})
+
+    file = request.files["file"]
+    if not file.filename:
+        print("No selected file")
+        return jsonify({})
+
+    if file and allowed_file(file.filename):
+        filename = secure_filename(file.filename)
+
+        filename = f"tmp_{int(1000*time.time())}{os.path.splitext(filename)[-1]}"
+        filepath = os.path.join(app.config["UPLOAD_FOLDER"], filename)
+        file.save(filepath)
+
+        img = cv2.imread(filepath)
+        gangster.make_gangster(img)
+        cv2.imwrite(filepath, img)
+
+        return jsonify({"url": url_for("uploaded_file", filename=filename)})
+    return jsonify({})
+    
 
 @app.route("/uploads/<filename>")
 def uploaded_file(filename):
