@@ -14,7 +14,7 @@ time.sleep(1.0)
 # loop over frames from the video stream
 while True:
     frame = vs.read()
-    frame = imutils.resize(frame, width=550)
+    frame = imutils.resize(frame, width=1000)
 
     n = make_gangster(frame)
 
