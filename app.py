@@ -10,7 +10,7 @@ import cv2
 
 
 UPLOAD_FOLDER = "uploads"
-ALLOWED_EXTENSIONS = {"jpg", "jpeg", "png", "gif"}
+ALLOWED_EXTENSIONS = {"jpg", "jpeg", "png", "gif", "webp"}
 
 app = Flask("Gangster Serve")
 app.config["UPLOAD_FOLDER"] = UPLOAD_FOLDER
