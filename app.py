@@ -2,7 +2,7 @@ import os
 import time
 import secrets
 
-from flask import Flask, request, flash, redirect, url_for, send_from_directory, jsonify
+from flask import Flask, request, flash, redirect, url_for, send_from_directory, jsonify, render_template
 from werkzeug.utils import secure_filename
 
 import gangster
@@ -51,15 +51,7 @@ def upload_file():
 
             return redirect(url_for("uploaded_file", filename=filename))
 
-    return """
-    <!doctype html>
-    <title>Auto Gangsta</title>
-    <h1>Gangstarify your image!</h1>
-    <form method=post enctype=multipart/form-data>
-      <input type="file" name="file">
-      <input type="submit" value="Gangstarify">
-    </form>
-    """
+    return render_template("index.html")
 
 
 @app.route("/api", methods=["POST"])
