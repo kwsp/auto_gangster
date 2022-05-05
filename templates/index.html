@@ -1,11 +1,11 @@
 <!doctype html>
 <title>Auto Gangsta</title>
+<link rel="icon" type="image/x-icon" href="/favicon.ico">
 <style>
 main {
   text-align: center;
   margin: auto;
 }
-
 </style>
 
 <main>
@@ -15,4 +15,16 @@ main {
   <input type="file" name="file">
   <input type="submit" value="Gangstarify">
 </form>
+
+{% if res_url %}
+    {% if n_faces == 0 %}
+        <p>No faces found</p>
+    {% elif n_faces == 1 %}
+        <p>Found {{ n_faces }} face</p>
+    {% else %}
+        <p>Found {{ n_faces }} faces</p>
+    {% endif %}
+    <img src="{{ res_url }}" width=500>
+{% endif %}
+
 </main>

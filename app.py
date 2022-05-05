@@ -1,8 +1,19 @@
 import os
 import time
 import secrets
+from io import BytesIO
 
-from flask import Flask, request, flash, redirect, url_for, send_from_directory, jsonify, render_template
+from flask import (
+    Flask,
+    request,
+    flash,
+    redirect,
+    url_for,
+    send_from_directory,
+    jsonify,
+    render_template,
+    make_response,
+)
 from werkzeug.utils import secure_filename
 
 import gangster
@@ -12,7 +23,7 @@ import cv2
 UPLOAD_FOLDER = "uploads"
 ALLOWED_EXTENSIONS = {"jpg", "jpeg", "png", "gif", "webp"}
 
-app = Flask("Gangster Serve")
+app = Flask("Gangster Serve", static_folder="static")
 
 app.config["UPLOAD_FOLDER"] = UPLOAD_FOLDER
 app.config["MAX_CONTENT_LENGTH"] = 5 * 1024 * 1024  # Limit upload size to 5mb
@@ -46,10 +57,12 @@ def upload_file():
             file.save(filepath)
 
             img = cv2.imread(filepath)
-            gangster.make_gangster(img)
+            n_faces = gangster.make_gangster(img)
             cv2.imwrite(filepath, img)
+            res_url = url_for("uploaded_file", filename=filename)
+            print(f"{res_url=}, {n_faces=}")
 
-            return redirect(url_for("uploaded_file", filename=filename))
+            return render_template("index.html", res_url=res_url, n_faces=n_faces)
 
     return render_template("index.html")
 
@@ -78,8 +91,20 @@ def api_upload():
 
         return jsonify({"url": url_for("uploaded_file", filename=filename)})
     return jsonify({})
-    
+
 
 @app.route("/uploads/<filename>")
 def uploaded_file(filename):
-    return send_from_directory(app.config["UPLOAD_FOLDER"], filename)
+    resp = make_response(send_from_directory(app.config["UPLOAD_FOLDER"], filename))
+    resp.headers["X-Robots-Tag"] = "noindex"
+    return resp
+
+
+@app.route("/favicon.ico")
+@app.route("/robot.txt")
+def static_from_root():
+    return send_from_directory(app.static_folder, request.path[1:])
+
+
+if __name__ == "__main__":
+    app.run()
