@@ -1,30 +1,34 @@
 <!doctype html>
 <title>Auto Gangsta</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 <link rel="icon" type="image/x-icon" href="/favicon.ico">
 <style>
 main {
   text-align: center;
-  margin: auto;
+}
+#rock {
+  width: 100%;
+  max-width: 500px;
+}
+#result {
+  width: 100%;
+  max-width: 500px;
 }
 </style>
 
 <main>
 <h1>Gangstarify your image!</h1>
-<img class="rock" src="/static/rock.jpg" width=500>
+<img id="rock" src="/static/rock.jpg" width=500>
 <form method=post enctype=multipart/form-data>
   <input type="file" name="file">
   <input type="submit" value="Gangstarify">
 </form>
 
+{% if msg %}
+  <p>{{ msg }}</p>
+{% endif %}
 {% if res_url %}
-    {% if n_faces == 0 %}
-        <p>No faces found</p>
-    {% elif n_faces == 1 %}
-        <p>Found {{ n_faces }} face</p>
-    {% else %}
-        <p>Found {{ n_faces }} faces</p>
-    {% endif %}
-    <img src="{{ res_url }}" width=500>
+  <img id="result" src="{{ res_url }}" width=500>
 {% endif %}
 
 </main>

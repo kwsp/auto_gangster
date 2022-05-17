@@ -76,9 +76,14 @@ def upload_file():
         n_faces = gangster.make_gangster(img)
         cv2.imwrite(filepath, img)
         res_url = url_for("uploaded_file", filename=filename)
-        print(f"{res_url=}, {n_faces=}")
+        if n_faces == 0:
+            msg = "No faces found"
+        elif n_faces == 1:
+            msg = "Found 1 face"
+        else:
+            msg = f"Found {n_faces} faces"
 
-        return render_template("index.html", res_url=res_url, n_faces=n_faces)
+        return render_template("index.html", res_url=res_url, msg=msg)
     return render_template("index.html")
 
 
